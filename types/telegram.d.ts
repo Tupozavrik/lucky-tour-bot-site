@@ -62,8 +62,13 @@ interface TelegramWebApp {
   isExpanded: boolean;
   viewportHeight: number;
   viewportStableHeight: number;
+
+  setBackgroundColor(color: "bg_color" | "secondary_bg_color" | string): void;
+  setHeaderColor(color: "bg_color" | "secondary_bg_color" | string): void;
+
   onEvent(eventType: TelegramEventType, eventHandler: () => void): void;
   offEvent(eventType: TelegramEventType, eventHandler: () => void): void;
+
   MainButton: {
     text: string;
     isVisible: boolean;
@@ -71,17 +76,26 @@ interface TelegramWebApp {
     show(): void;
     hide(): void;
     onClick(fn: () => void): void;
+    // (Отсюда мы их убрали)
   };
+
   BackButton: {
     isVisible: boolean;
     show(): void;
     hide(): void;
     onClick(fn: () => void): void;
   };
+
   HapticFeedback: {
     impactOccurred(style: "light" | "medium" | "heavy" | "rigid" | "soft"): void;
     notificationOccurred(type: "error" | "success" | "warning"): void;
     selectionChanged(): void;
+  };
+}
+
+interface Window {
+  Telegram?: {
+    WebApp: TelegramWebApp;
   };
 }
 
