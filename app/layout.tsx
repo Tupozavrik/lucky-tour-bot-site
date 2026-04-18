@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import TelegramThemeProvider from "@/components/TelegramThemeProvider";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
 
@@ -14,7 +15,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0d1117",
 };
 
 export default function RootLayout({
@@ -23,11 +23,13 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
-        {/* Telegram Web App SDK */}
-        <script src="https://telegram.org/js/telegram-web-app.js" async />
+        {/* Telegram Web App SDK — обязателен для доступа к themeParams */}
+        <script src="https://telegram.org/js/telegram-web-app.js" />
       </head>
-      <body className="h-full bg-[#0d1117] text-white antialiased" suppressHydrationWarning>
-        {children}
+      <body className="h-full antialiased" suppressHydrationWarning>
+        <TelegramThemeProvider>
+          {children}
+        </TelegramThemeProvider>
       </body>
     </html>
   );

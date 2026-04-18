@@ -27,27 +27,32 @@ function starsString(count: number | null): string {
   return "★".repeat(Math.min(count, 5));
 }
 
-function transferLabel(status: string | null): { label: string; color: string } {
+function transferLabel(status: string | null): { label: string; colorVar: string } {
   switch (status?.toLowerCase()) {
-    case "included": return { label: "Включён", color: "text-emerald-400" };
-    case "not_included": return { label: "Не включён", color: "text-red-400" };
-    case "on_request": return { label: "По запросу", color: "text-amber-400" };
-    default: return { label: status ?? "—", color: "text-slate-400" };
+    case "included": return { label: "Включён", colorVar: "#34d399" };
+    case "not_included": return { label: "Не включён", colorVar: "var(--tg-destructive)" };
+    case "on_request": return { label: "По запросу", colorVar: "#fbbf24" };
+    default: return { label: status ?? "—", colorVar: "var(--tg-hint)" };
   }
 }
 
-function InfoCard({ icon, label, value, valueClass = "" }: {
+function InfoCard({ icon, label, value, valueColor }: {
   icon: string;
   label: string;
   value: string;
-  valueClass?: string;
+  valueColor?: string;
 }) {
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-white/5 last:border-0">
+    <div
+      className="flex items-start gap-3 py-3 last:border-0"
+      style={{ borderBottom: "1px solid color-mix(in srgb, var(--tg-hint) 15%, transparent)" }}
+    >
       <span className="text-xl w-7 shrink-0" aria-hidden>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-        <p className={`text-sm font-medium leading-snug break-words ${valueClass}`}>{value}</p>
+        <p className="text-xs uppercase tracking-wider mb-0.5" style={{ color: "var(--tg-section-header)" }}>{label}</p>
+        <p className="text-sm font-medium leading-snug break-words" style={{ color: valueColor ?? "var(--tg-text)" }}>
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -55,7 +60,10 @@ function InfoCard({ icon, label, value, valueClass = "" }: {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2 mt-4 first:mt-0">
+    <h2
+      className="text-xs font-semibold uppercase tracking-widest mb-2 mt-4 first:mt-0"
+      style={{ color: "var(--tg-subtitle)" }}
+    >
       {children}
     </h2>
   );
@@ -63,13 +71,22 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function FlightCard({ flight }: { flight: TourFlight }) {
   return (
-    <div className="bg-white/5 rounded-2xl p-4 mb-3">
+    <div
+      className="rounded-2xl p-4 mb-3"
+      style={{ background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))" }}
+    >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs text-slate-400 uppercase tracking-wider">
+        <p className="text-xs uppercase tracking-wider" style={{ color: "var(--tg-hint)" }}>
           {flight.direction === "outbound" ? "✈️ Туда" : "✈️ Обратно"}
         </p>
         {flight.flight_number && (
-          <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-mono">
+          <span
+            className="px-2 py-0.5 rounded-full text-[10px] font-mono"
+            style={{
+              background: "color-mix(in srgb, var(--tg-button) 20%, transparent)",
+              color: "var(--tg-link)",
+            }}
+          >
             {flight.flight_number}
           </span>
         )}
@@ -77,21 +94,23 @@ function FlightCard({ flight }: { flight: TourFlight }) {
       <div className="flex items-center justify-between gap-2">
         <div className="text-center min-w-0 flex-1">
           <p className="text-lg font-bold tabular-nums">{formatDateTime(flight.departure_datetime)}</p>
-          <p className="text-xs text-slate-400 truncate">{flight.departure_airport ?? "—"}</p>
+          <p className="text-xs truncate" style={{ color: "var(--tg-hint)" }}>{flight.departure_airport ?? "—"}</p>
         </div>
         <div className="flex flex-col items-center gap-0.5 shrink-0 w-12">
           <div className="w-full flex items-center gap-0.5">
-            <div className="flex-1 h-px bg-slate-600" />
-            <span className="text-slate-500 text-xs">✈</span>
-            <div className="flex-1 h-px bg-slate-600" />
+            <div className="flex-1 h-px" style={{ background: "var(--tg-hint)", opacity: 0.4 }} />
+            <span className="text-xs" style={{ color: "var(--tg-hint)" }}>✈</span>
+            <div className="flex-1 h-px" style={{ background: "var(--tg-hint)", opacity: 0.4 }} />
           </div>
           {flight.airline && (
-            <p className="text-[9px] text-slate-600 text-center leading-tight">{flight.airline}</p>
+            <p className="text-[9px] text-center leading-tight" style={{ color: "var(--tg-hint)", opacity: 0.6 }}>
+              {flight.airline}
+            </p>
           )}
         </div>
         <div className="text-center min-w-0 flex-1">
           <p className="text-lg font-bold tabular-nums">{formatDateTime(flight.arrival_datetime)}</p>
-          <p className="text-xs text-slate-400 truncate">{flight.arrival_airport ?? "—"}</p>
+          <p className="text-xs truncate" style={{ color: "var(--tg-hint)" }}>{flight.arrival_airport ?? "—"}</p>
         </div>
       </div>
     </div>
@@ -110,21 +129,32 @@ export default function TourDashboard({ tour, isMock }: TourDashboardProps) {
   return (
     <div className="px-4 pb-8">
       {isMock && (
-        <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2">
-          <span className="text-amber-400 mt-0.5">ℹ️</span>
-          <p className="text-xs text-amber-400 leading-relaxed">
-            Демо-режим: отображаются тестовые данные. Для просмотра реального тура откройте через бот.
+        <div
+          className="mb-4 p-3 rounded-xl flex items-start gap-2 border"
+          style={{
+            background: "color-mix(in srgb, #fbbf24 10%, transparent)",
+            borderColor: "color-mix(in srgb, #fbbf24 20%, transparent)",
+          }}
+        >
+          <span className="mt-0.5" style={{ color: "#fbbf24" }}>ℹ️</span>
+          <p className="text-xs leading-relaxed" style={{ color: "#fbbf24" }}>
+            Демо-режим: отображаются тестовые данные. Для просмотра реального тура откройте через бота.
           </p>
         </div>
       )}
 
       <SectionTitle>🏨 Проживание</SectionTitle>
       {hotel ? (
-        <div className="bg-white/5 rounded-2xl p-4 mb-3">
+        <div
+          className="rounded-2xl p-4 mb-3"
+          style={{ background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))" }}
+        >
           <div className="flex items-start justify-between gap-2 mb-3">
             <h3 className="text-base font-semibold leading-tight">{hotel.name}</h3>
             {hotel.stars && (
-              <span className="text-amber-400 text-sm shrink-0">{starsString(hotel.stars)}</span>
+              <span className="text-sm shrink-0" style={{ color: "#fbbf24" }}>
+                {starsString(hotel.stars)}
+              </span>
             )}
           </div>
           <InfoCard
@@ -140,7 +170,13 @@ export default function TourDashboard({ tour, isMock }: TourDashboardProps) {
           />
         </div>
       ) : (
-        <div className="bg-white/5 rounded-2xl p-4 mb-3 text-center text-sm text-slate-500">
+        <div
+          className="rounded-2xl p-4 mb-3 text-center text-sm"
+          style={{
+            background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
+            color: "var(--tg-hint)",
+          }}
+        >
           Информация об отеле недоступна
         </div>
       )}
@@ -151,7 +187,13 @@ export default function TourDashboard({ tour, isMock }: TourDashboardProps) {
           <FlightCard key={`${f.flight_number ?? i}-${f.direction}`} flight={f} />
         ))
       ) : (
-        <div className="bg-white/5 rounded-2xl p-4 mb-3 text-center text-sm text-slate-500">
+        <div
+          className="rounded-2xl p-4 mb-3 text-center text-sm"
+          style={{
+            background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
+            color: "var(--tg-hint)",
+          }}
+        >
           Информация о рейсах недоступна
         </div>
       )}
@@ -159,8 +201,11 @@ export default function TourDashboard({ tour, isMock }: TourDashboardProps) {
       {transfer && (
         <>
           <SectionTitle>🚌 Трансфер</SectionTitle>
-          <div className="bg-white/5 rounded-2xl p-4">
-            <InfoCard icon="🔖" label="Статус" value={tf.label} valueClass={tf.color} />
+          <div
+            className="rounded-2xl p-4"
+            style={{ background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))" }}
+          >
+            <InfoCard icon="🔖" label="Статус" value={tf.label} valueColor={tf.colorVar} />
             {transfer.type && <InfoCard icon="🚐" label="Тип" value={transfer.type} />}
           </div>
         </>
