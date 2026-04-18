@@ -22,95 +22,51 @@ function formatDateTime(iso: string | null): string {
   }
 }
 
-function starsString(count: number | null): string {
-  if (!count || count <= 0) return "";
-  return "★".repeat(Math.min(count, 5));
-}
-
-function transferLabel(status: string | null): { label: string; colorVar: string } {
-  switch (status?.toLowerCase()) {
-    case "included": return { label: "Включён", colorVar: "#34d399" };
-    case "not_included": return { label: "Не включён", colorVar: "var(--tg-destructive)" };
-    case "on_request": return { label: "По запросу", colorVar: "#fbbf24" };
-    default: return { label: status ?? "—", colorVar: "var(--tg-hint)" };
-  }
-}
-
-function InfoCard({ icon, label, value, valueColor }: {
-  icon: string;
-  label: string;
-  value: string;
-  valueColor?: string;
-}) {
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div
-      className="flex items-start gap-3 py-3 last:border-0"
-      style={{ borderBottom: "1px solid color-mix(in srgb, var(--tg-hint) 15%, transparent)" }}
-    >
-      <span className="text-xl w-7 shrink-0" aria-hidden>{icon}</span>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs uppercase tracking-wider mb-0.5" style={{ color: "var(--tg-section-header)" }}>{label}</p>
-        <p className="text-sm font-medium leading-snug break-words" style={{ color: valueColor ?? "var(--tg-text)" }}>
-          {value}
-        </p>
-      </div>
+    <div className="flex justify-between items-center py-3 border-b border-tg-border last:border-0 gap-4">
+      <span className="text-[15px] text-tg-hint shrink-0">{label}</span>
+      <span className="text-[15px] text-right break-words">{value}</span>
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2
-      className="text-xs font-semibold uppercase tracking-widest mb-2 mt-4 first:mt-0"
-      style={{ color: "var(--tg-subtitle)" }}
-    >
+    <h2 className="text-[13px] font-medium uppercase tracking-wide text-tg-hint mb-1.5 mt-6 px-4">
       {children}
     </h2>
   );
 }
 
-function FlightCard({ flight }: { flight: TourFlight }) {
+function FlightCard({ flight, index }: { flight: TourFlight; index: number }) {
+  const isOutbound = flight.direction === "outbound";
+
   return (
-    <div
-      className="rounded-2xl p-4 mb-3"
-      style={{ background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))" }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs uppercase tracking-wider" style={{ color: "var(--tg-hint)" }}>
-          {flight.direction === "outbound" ? "✈️ Туда" : "✈️ Обратно"}
-        </p>
+    <div className="bg-tg-secondary rounded-xl mx-4 mb-3 overflow-hidden">
+      <div className="px-4 py-2 bg-black/5 dark:bg-white/5 border-b border-tg-border flex justify-between items-center">
+        <span className="text-[13px] font-medium text-tg-hint">
+          {isOutbound ? "Туда" : "Обратно"}
+        </span>
         {flight.flight_number && (
-          <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-mono"
-            style={{
-              background: "color-mix(in srgb, var(--tg-button) 20%, transparent)",
-              color: "var(--tg-link)",
-            }}
-          >
-            {flight.flight_number}
-          </span>
+          <span className="text-[13px] font-mono text-tg-link">{flight.flight_number}</span>
         )}
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-center min-w-0 flex-1">
-          <p className="text-lg font-bold tabular-nums">{formatDateTime(flight.departure_datetime)}</p>
-          <p className="text-xs truncate" style={{ color: "var(--tg-hint)" }}>{flight.departure_airport ?? "—"}</p>
+      <div className="p-4 flex items-center justify-between gap-3">
+        <div className="text-center flex-1">
+          <p className="text-[19px] font-semibold tabular-nums">{formatDateTime(flight.departure_datetime)}</p>
+          <p className="text-[13px] text-tg-hint truncate">{flight.departure_airport ?? "—"}</p>
         </div>
-        <div className="flex flex-col items-center gap-0.5 shrink-0 w-12">
-          <div className="w-full flex items-center gap-0.5">
-            <div className="flex-1 h-px" style={{ background: "var(--tg-hint)", opacity: 0.4 }} />
-            <span className="text-xs" style={{ color: "var(--tg-hint)" }}>✈</span>
-            <div className="flex-1 h-px" style={{ background: "var(--tg-hint)", opacity: 0.4 }} />
+        <div className="flex flex-col items-center flex-1">
+          <div className="h-[1px] w-full bg-tg-border relative mb-1">
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-tg-secondary px-2 text-[10px] text-tg-hint uppercase tracking-wider">
+              {flight.airline || "Рейс"}
+            </span>
           </div>
-          {flight.airline && (
-            <p className="text-[9px] text-center leading-tight" style={{ color: "var(--tg-hint)", opacity: 0.6 }}>
-              {flight.airline}
-            </p>
-          )}
         </div>
-        <div className="text-center min-w-0 flex-1">
-          <p className="text-lg font-bold tabular-nums">{formatDateTime(flight.arrival_datetime)}</p>
-          <p className="text-xs truncate" style={{ color: "var(--tg-hint)" }}>{flight.arrival_airport ?? "—"}</p>
+        <div className="text-center flex-1">
+          <p className="text-[19px] font-semibold tabular-nums">{formatDateTime(flight.arrival_datetime)}</p>
+          <p className="text-[13px] text-tg-hint truncate">{flight.arrival_airport ?? "—"}</p>
         </div>
       </div>
     </div>
@@ -119,94 +75,64 @@ function FlightCard({ flight }: { flight: TourFlight }) {
 
 interface TourDashboardProps {
   tour: TourDetails;
-  isMock?: boolean;
 }
 
-export default function TourDashboard({ tour, isMock }: TourDashboardProps) {
+export default function TourDashboard({ tour }: TourDashboardProps) {
   const { hotel, flights, transfer, check_in, check_out } = tour;
-  const tf = transferLabel(transfer?.status ?? null);
+
+  const transferLabel = (status: string | null) => {
+    switch (status?.toLowerCase()) {
+      case "included": return "Включён";
+      case "not_included": return "Не включён";
+      case "on_request": return "По запросу";
+      default: return status ?? "—";
+    }
+  };
 
   return (
-    <div className="px-4 pb-8">
-      {isMock && (
-        <div
-          className="mb-4 p-3 rounded-xl flex items-start gap-2 border"
-          style={{
-            background: "color-mix(in srgb, #fbbf24 10%, transparent)",
-            borderColor: "color-mix(in srgb, #fbbf24 20%, transparent)",
-          }}
-        >
-          <span className="mt-0.5" style={{ color: "#fbbf24" }}>ℹ️</span>
-          <p className="text-xs leading-relaxed" style={{ color: "#fbbf24" }}>
-            Демо-режим: отображаются тестовые данные. Для просмотра реального тура откройте через бота.
-          </p>
-        </div>
-      )}
+    <div className="pb-8">
+      <SectionTitle>Проживание</SectionTitle>
+      <div className="bg-tg-secondary mx-4 rounded-xl px-4">
+        {hotel ? (
+          <>
+            <div className="py-3 border-b border-tg-border">
+              <h3 className="text-[17px] font-medium leading-tight">{hotel.name}</h3>
+              {hotel.stars && (
+                <p className="text-[13px] text-tg-hint mt-0.5">
+                  {"★".repeat(Math.min(hotel.stars, 5))}
+                </p>
+              )}
+            </div>
+            <InfoRow
+              label="Локация"
+              value={[hotel.location.city, hotel.location.country].filter(Boolean).join(", ") || "—"}
+            />
+            {hotel.address && <InfoRow label="Адрес" value={hotel.address} />}
+            <InfoRow label="Заезд" value={formatDate(check_in)} />
+            <InfoRow label="Выезд" value={formatDate(check_out)} />
+          </>
+        ) : (
+          <div className="py-4 text-center text-[15px] text-tg-hint">Нет данных об отеле</div>
+        )}
+      </div>
 
-      <SectionTitle>🏨 Проживание</SectionTitle>
-      {hotel ? (
-        <div
-          className="rounded-2xl p-4 mb-3"
-          style={{ background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))" }}
-        >
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <h3 className="text-base font-semibold leading-tight">{hotel.name}</h3>
-            {hotel.stars && (
-              <span className="text-sm shrink-0" style={{ color: "#fbbf24" }}>
-                {starsString(hotel.stars)}
-              </span>
-            )}
-          </div>
-          <InfoCard
-            icon="📍"
-            label="Локация"
-            value={[hotel.location.city, hotel.location.country].filter(Boolean).join(", ") || "—"}
-          />
-          {hotel.address && <InfoCard icon="🗺️" label="Адрес" value={hotel.address} />}
-          <InfoCard
-            icon="🗓️"
-            label="Заезд / Выезд"
-            value={`${formatDate(check_in)} — ${formatDate(check_out)}`}
-          />
-        </div>
-      ) : (
-        <div
-          className="rounded-2xl p-4 mb-3 text-center text-sm"
-          style={{
-            background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
-            color: "var(--tg-hint)",
-          }}
-        >
-          Информация об отеле недоступна
-        </div>
-      )}
-
-      <SectionTitle>✈️ Перелёт</SectionTitle>
+      <SectionTitle>Перелёт</SectionTitle>
       {flights.length > 0 ? (
         flights.map((f, i) => (
-          <FlightCard key={`${f.flight_number ?? i}-${f.direction}`} flight={f} />
+          <FlightCard key={`${f.flight_number ?? i}-${f.direction}`} flight={f} index={i} />
         ))
       ) : (
-        <div
-          className="rounded-2xl p-4 mb-3 text-center text-sm"
-          style={{
-            background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
-            color: "var(--tg-hint)",
-          }}
-        >
-          Информация о рейсах недоступна
+        <div className="bg-tg-secondary mx-4 rounded-xl p-4 text-center text-[15px] text-tg-hint">
+          Нет данных о рейсах
         </div>
       )}
 
       {transfer && (
         <>
-          <SectionTitle>🚌 Трансфер</SectionTitle>
-          <div
-            className="rounded-2xl p-4"
-            style={{ background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))" }}
-          >
-            <InfoCard icon="🔖" label="Статус" value={tf.label} valueColor={tf.colorVar} />
-            {transfer.type && <InfoCard icon="🚐" label="Тип" value={transfer.type} />}
+          <SectionTitle>Трансфер</SectionTitle>
+          <div className="bg-tg-secondary mx-4 rounded-xl px-4">
+            <InfoRow label="Статус" value={transferLabel(transfer.status ?? null)} />
+            {transfer.type && <InfoRow label="Тип" value={transfer.type} />}
           </div>
         </>
       )}

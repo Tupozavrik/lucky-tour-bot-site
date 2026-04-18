@@ -9,35 +9,25 @@ import type { MapPoint } from "@/components/YandexMapWidget";
 
 type Tab = "tour" | "map" | "translate";
 
-const TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: "tour", icon: "🏖️", label: "Тур" },
-  { id: "map", icon: "🗺️", label: "Карта" },
-  { id: "translate", icon: "🌐", label: "Перевод" },
+const TABS: { id: Tab; label: string }[] = [
+  { id: "tour", label: "Детали" },
+  { id: "map", label: "Карта" },
+  { id: "translate", label: "Переводчик" },
 ];
 
 function LoadingSpinner() {
   return (
     <div className="flex flex-col items-center justify-center h-48 gap-3">
-      <svg className="animate-spin h-8 w-8" style={{ color: "var(--tg-button)" }} viewBox="0 0 24 24" fill="none" aria-label="Загрузка">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-      </svg>
-      <p className="text-sm" style={{ color: "var(--tg-hint)" }}>Загружаем данные тура…</p>
+      <div className="animate-spin h-6 w-6 border-2 border-tg-hint border-t-tg-link rounded-full" />
     </div>
   );
 }
 
 function ErrorCard({ message }: { message: string }) {
   return (
-    <div
-      className="mx-4 mt-6 p-4 rounded-2xl border"
-      style={{
-        background: "color-mix(in srgb, var(--tg-destructive) 10%, transparent)",
-        borderColor: "color-mix(in srgb, var(--tg-destructive) 25%, transparent)",
-      }}
-    >
-      <p className="text-sm font-medium mb-1" style={{ color: "var(--tg-destructive)" }}>⚠️ Ошибка загрузки</p>
-      <p className="text-xs" style={{ color: "color-mix(in srgb, var(--tg-destructive) 70%, transparent)" }}>{message}</p>
+    <div className="mx-4 mt-6 p-4 bg-red-500/10 rounded-xl">
+      <p className="text-sm text-red-500 font-medium mb-1">Ошибка</p>
+      <p className="text-xs text-red-400/80">{message}</p>
     </div>
   );
 }
@@ -53,137 +43,87 @@ export default function TourPage() {
     async function loadTour() {
       try {
         let requestId: string | null = null;
-
         if (window.Telegram?.WebApp) {
           const tg = window.Telegram.WebApp;
+          tg.ready();
+          tg.expand();
           requestId = tg.initDataUnsafe?.start_param ?? null;
+          // Сообщаем телеграму цвет фона для плавного скролла
+          tg.setHeaderColor("bg_color");
+          tg.setBackgroundColor("bg_color");
         }
-
-        if (!requestId) {
-          requestId = new URLSearchParams(window.location.search).get("id");
-        }
-
-        if (!requestId) {
-          requestId = "mock";
-        }
+        if (!requestId) requestId = new URLSearchParams(window.location.search).get("id") || "mock";
 
         const res = await fetch(`/api/tour?id=${encodeURIComponent(requestId)}`);
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.error ?? "Ошибка загрузки данных тура");
 
         if (data.isMock) setIsMock(true);
         const { isMock: _, ...tourData } = data;
         setTour(tourData as TourDetails);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Неизвестная ошибка. Попробуйте позже.");
+        setError(err instanceof Error ? err.message : "Неизвестная ошибка");
       } finally {
         setLoading(false);
       }
     }
-
     loadTour();
   }, []);
 
   const hotelPoint: MapPoint | null =
     tour?.hotel?.location.lat && tour.hotel.location.lng
       ? {
-          lat: tour.hotel.location.lat,
-          lng: tour.hotel.location.lng,
-          label: tour.hotel.name,
-          hint: tour.hotel.address ?? tour.hotel.name,
-        }
+        lat: tour.hotel.location.lat,
+        lng: tour.hotel.location.lng,
+        label: tour.hotel.name,
+        hint: tour.hotel.address ?? tour.hotel.name,
+      }
       : null;
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: "var(--tg-bg)", color: "var(--tg-text)" }}>
-      {/* Шапка */}
-      <header
-        className="sticky top-0 z-20 backdrop-blur-xl border-b px-4 py-3"
-        style={{
-          background: "color-mix(in srgb, var(--tg-header-bg) 90%, transparent)",
-          borderColor: "color-mix(in srgb, var(--tg-hint) 15%, transparent)",
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <h1 className="text-base font-semibold">🌴 Lucky Tour</h1>
-          {isMock && (
-            <span
-              className="text-[10px] px-2 py-0.5 rounded-full font-mono border"
-              style={{
-                background: "color-mix(in srgb, var(--tg-accent) 20%, transparent)",
-                color: "var(--tg-accent)",
-                borderColor: "color-mix(in srgb, var(--tg-accent) 30%, transparent)",
-              }}
-            >
-              DEMO
-            </span>
-          )}
+    <div className="min-h-dvh flex flex-col">
+      <header className="sticky top-0 z-20 bg-tg-bg/80 backdrop-blur-xl border-b border-tg-border px-4 py-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-base font-semibold">Lucky Tour</h1>
+          {tour && <p className="text-xs text-tg-hint mt-0.5">Заявка #{tour.request_id}</p>}
         </div>
-        {tour && (
-          <p className="text-xs mt-0.5" style={{ color: "var(--tg-hint)" }}>
-            Заявка #{tour.request_id}
-          </p>
+        {isMock && (
+          <span className="text-[10px] bg-tg-secondary text-tg-text px-2 py-1 rounded-md font-medium uppercase tracking-wider">
+            Demo
+          </span>
         )}
       </header>
 
-      {/* Контент */}
       <main className="flex-1 overflow-y-auto">
         {loading && <LoadingSpinner />}
         {!loading && error && <ErrorCard message={error} />}
         {!loading && !error && tour && (
-          <>
-            {activeTab === "tour" && (
-              <div className="pt-4">
-                <TourDashboard tour={tour} isMock={isMock} />
-              </div>
-            )}
+          <div className="pb-6">
+            {activeTab === "tour" && <TourDashboard tour={tour} />}
             {activeTab === "map" && (
               <div className="p-4">
                 <YandexMapWidget hotel={hotelPoint} height="65dvh" />
-                {!hotelPoint && (
-                  <p className="text-xs mt-3 text-center" style={{ color: "var(--tg-hint)" }}>
-                    Координаты отеля недоступны в API
-                  </p>
-                )}
+                {!hotelPoint && <p className="text-sm text-tg-hint mt-4 text-center">Координаты недоступны</p>}
               </div>
             )}
-            {activeTab === "translate" && (
-              <div className="pt-4">
-                <TranslatorWidget />
-              </div>
-            )}
-          </>
+            {activeTab === "translate" && <div className="pt-4"><TranslatorWidget /></div>}
+          </div>
         )}
       </main>
 
-      {/* Навбар */}
       {!loading && !error && tour && (
-        <nav
-          className="sticky bottom-0 z-20 backdrop-blur-xl border-t"
-          style={{
-            background: "color-mix(in srgb, var(--tg-bottom-bar-bg) 95%, transparent)",
-            borderColor: "color-mix(in srgb, var(--tg-hint) 15%, transparent)",
-          }}
-        >
-          <div className="flex">
+        <nav className="sticky bottom-0 z-20 bg-tg-bg/90 backdrop-blur-xl border-t border-tg-border pb-safe">
+          <div className="flex px-2 py-1">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex-1 flex flex-col items-center gap-1 pt-3 pb-4 text-xs transition-colors"
-                  style={{ color: isActive ? "var(--tg-accent)" : "var(--tg-hint)" }}
+                  className={`flex-1 py-3 text-[13px] font-medium transition-colors ${isActive ? "text-tg-link" : "text-tg-hint"
+                    }`}
                 >
-                  <span className="text-lg leading-none">{tab.icon}</span>
-                  <span>{tab.label}</span>
-                  {isActive && (
-                    <span
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full"
-                      style={{ background: "var(--tg-accent)" }}
-                    />
-                  )}
+                  {tab.label}
                 </button>
               );
             })}
