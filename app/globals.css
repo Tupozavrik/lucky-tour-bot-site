@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Фоллбеки для обычного браузера (Светлая тема по умолчанию) */
+  --tg-theme-bg-color: #ffffff;
+  --tg-theme-text-color: #000000;
+  --tg-theme-hint-color: #999999;
+  --tg-theme-link-color: #2481cc;
+  --tg-theme-button-color: #2481cc;
+  --tg-theme-button-text-color: #ffffff;
+  --tg-theme-secondary-bg-color: #f4f4f5;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Фоллбеки для темной темы в обычном браузере */
+    --tg-theme-bg-color: #17212b;
+    --tg-theme-text-color: #f5f5f5;
+    --tg-theme-hint-color: #708499;
+    --tg-theme-link-color: #5288c1;
+    --tg-theme-button-color: #5288c1;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #232e3c;
   }
 }
 
+/* Интеграция переменных Telegram Web App в Tailwind v4 */
+@theme inline {
+  --color-tg-bg: var(--tg-theme-bg-color);
+  --color-tg-text: var(--tg-theme-text-color);
+  --color-tg-hint: var(--tg-theme-hint-color);
+  --color-tg-link: var(--tg-theme-link-color);
+  --color-tg-button: var(--tg-theme-button-color);
+  --color-tg-button-text: var(--tg-theme-button-text-color);
+  --color-tg-secondary: var(--tg-theme-secondary-bg-color);
+  /* Полупрозрачный цвет для тонких разделителей */
+  --color-tg-border: color-mix(in srgb, var(--tg-theme-hint-color) 25%, transparent);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  -webkit-tap-highlight-color: transparent;
 }

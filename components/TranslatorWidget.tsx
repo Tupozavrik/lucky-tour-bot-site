@@ -62,11 +62,16 @@ export default function TranslatorWidget() {
 
   return (
     <div className="px-4 pb-6">
+      {/* Выбор языков */}
       <div className="flex items-center gap-2 mb-3">
         <LangSelect value={from} onChange={(v) => { setFrom(v); setResult(null); }} />
         <button
           onClick={swapLanguages}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all"
+          className="p-2 rounded-xl active:scale-95 transition-all"
+          style={{
+            background: "color-mix(in srgb, var(--tg-hint) 12%, transparent)",
+            color: "var(--tg-text)",
+          }}
           aria-label="Поменять языки"
         >
           ⇄
@@ -74,23 +79,37 @@ export default function TranslatorWidget() {
         <LangSelect value={to} onChange={(v) => { setTo(v); setResult(null); }} />
       </div>
 
+      {/* Текстовое поле */}
       <div className="relative mb-3">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, maxChars))}
           placeholder="Введите текст для перевода..."
           rows={4}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm resize-none outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition-all placeholder:text-slate-500"
+          className="w-full rounded-2xl px-4 py-3 text-sm resize-none outline-none transition-all"
+          style={{
+            background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
+            border: "1px solid color-mix(in srgb, var(--tg-hint) 20%, transparent)",
+            color: "var(--tg-text)",
+          }}
         />
-        <span className={`absolute bottom-3 right-3 text-[10px] ${text.length >= maxChars ? "text-red-400" : "text-slate-500"}`}>
+        <span
+          className="absolute bottom-3 right-3 text-[10px]"
+          style={{ color: text.length >= maxChars ? "var(--tg-destructive)" : "var(--tg-hint)" }}
+        >
           {text.length}/{maxChars}
         </span>
       </div>
 
+      {/* Кнопка перевода */}
       <button
         onClick={handleTranslate}
         disabled={isPending || !text.trim()}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold hover:from-blue-500 hover:to-indigo-500 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+        className="w-full py-3 rounded-2xl text-sm font-semibold active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+        style={{
+          background: "var(--tg-button)",
+          color: "var(--tg-button-text)",
+        }}
       >
         {isPending ? (
           <span className="flex items-center justify-center gap-2">
@@ -100,27 +119,48 @@ export default function TranslatorWidget() {
         ) : "Перевести"}
       </button>
 
+      {/* Ошибка */}
       {error && (
-        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-sm text-red-400">
+        <div
+          className="mt-3 p-3 rounded-2xl text-sm border"
+          style={{
+            background: "color-mix(in srgb, var(--tg-destructive) 10%, transparent)",
+            borderColor: "color-mix(in srgb, var(--tg-destructive) 25%, transparent)",
+            color: "var(--tg-destructive)",
+          }}
+        >
           ⚠️ {error}
         </div>
       )}
 
+      {/* Результат */}
       {result && (
-        <div className="mt-3 bg-white/5 border border-white/10 rounded-2xl p-4">
+        <div
+          className="mt-3 rounded-2xl p-4 border"
+          style={{
+            background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
+            borderColor: "color-mix(in srgb, var(--tg-hint) 20%, transparent)",
+          }}
+        >
           <div className="flex items-center justify-between gap-2 mb-2">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Перевод</p>
+            <p className="text-xs uppercase tracking-wider" style={{ color: "var(--tg-section-header)" }}>Перевод</p>
             <button
               onClick={copyResult}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs active:scale-95 transition-all"
+              style={{
+                color: "var(--tg-hint)",
+                background: "color-mix(in srgb, var(--tg-hint) 10%, transparent)",
+              }}
             >
               <CopyIcon className="w-3.5 h-3.5" />
               Копировать
             </button>
           </div>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{result.translatedText}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--tg-text)" }}>
+            {result.translatedText}
+          </p>
           {result.confidence < 1 && (
-            <p className="text-[10px] text-slate-500 mt-2">
+            <p className="text-[10px] mt-2" style={{ color: "var(--tg-hint)" }}>
               Уверенность: {Math.round(result.confidence * 100)}%
             </p>
           )}
@@ -135,10 +175,15 @@ function LangSelect({ value, onChange }: { value: string; onChange: (v: string) 
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer"
+      className="flex-1 rounded-xl px-3 py-2 text-sm outline-none transition-all appearance-none cursor-pointer"
+      style={{
+        background: "color-mix(in srgb, var(--tg-hint) 10%, var(--tg-section-bg))",
+        border: "1px solid color-mix(in srgb, var(--tg-hint) 20%, transparent)",
+        color: "var(--tg-text)",
+      }}
     >
       {LANGUAGES.map((lang) => (
-        <option key={lang.code} value={lang.code} className="bg-slate-900">
+        <option key={lang.code} value={lang.code}>
           {lang.label}
         </option>
       ))}

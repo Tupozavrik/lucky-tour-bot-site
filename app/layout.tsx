@@ -14,7 +14,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0d1117",
 };
 
 export default function RootLayout({
@@ -23,10 +22,9 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
-        {/* Telegram Web App SDK */}
         <script src="https://telegram.org/js/telegram-web-app.js" async />
       </head>
-      <body className="h-full bg-[#0d1117] text-white antialiased" suppressHydrationWarning>
+      <body className="h-full bg-tg-bg text-tg-text antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>
